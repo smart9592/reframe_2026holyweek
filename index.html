@@ -20,6 +20,20 @@
   OneSignalDeferred.push(async function(OneSignal) {
     await OneSignal.init({
       appId: "5a012279-e9de-41ca-96ba-fffde226587b",
+      promptOptions: {
+        slidedown: {
+          prompts: [{
+            type: "push",
+            autoPrompt: true,
+            text: {
+              actionMessage: "홀리위크 시간대별 말씀 알림을 받으시겠어요?",
+              acceptButton: "예",
+              cancelButton: "아니오"
+            },
+            delay: { pageViews: 1, timeDelay: 3 }
+          }]
+        }
+      }
     });
   });
 </script>

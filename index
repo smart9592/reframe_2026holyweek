@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>고난주간 말씀 묵상 2026</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;overflow:hidden;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}
+body{background:#0c0c0c;color:#e8e4dc}
+
+/* 전체 슬라이더 */
+.slider-wrap{width:100%;height:100vh;overflow:hidden;position:relative}
+.slider{display:flex;height:100%;transition:transform 0.38s cubic-bezier(0.4,0,0.2,1);will-change:transform}
+.slide{flex-shrink:0;width:100%;height:100%;overflow-y:auto;-webkit-overflow-scrolling:touch}
+
+/* 상단 헤더 */
+.day-header{position:sticky;top:0;z-index:10;padding:env(safe-area-inset-top,0) 0 0;background:linear-gradient(180deg,#0c0c0c 80%,transparent)}
+.day-header-inner{padding:1.4rem 1.5rem 0.8rem}
+.church-label{font-size:11px;letter-spacing:0.12em;color:#4a4642;text-transform:uppercase;margin-bottom:6px}
+.day-name{font-size:26px;font-weight:400;color:#e8e4dc;letter-spacing:0.01em;line-height:1.2}
+.day-date{font-size:13px;color:#5a5652;margin-top:4px}
+.today-chip{display:inline-block;font-size:11px;padding:2px 10px;border-radius:20px;background:#26215C;color:#AFA9EC;margin-top:6px}
+
+/* 도트 네비게이션 */
+.dots{display:flex;justify-content:center;gap:6px;padding:10px 0 6px}
+.dot{width:5px;height:5px;border-radius:50%;background:#2a2a2a;transition:all 0.2s;cursor:pointer}
+.dot.active{background:#7F77DD;width:16px;border-radius:3px}
+.dot.pasch{background:#534AB7}
+
+/* 시간대 목록 */
+.times-list{padding:0.5rem 1.5rem 6rem}
+.time-block{margin-bottom:2px}
+.time-toggle{display:flex;align-items:center;gap:10px;padding:11px 0;cursor:pointer;border-bottom:0.5px solid #1a1a1a;user-select:none}
+.time-badge{font-size:11px;font-family:monospace;font-weight:500;color:#4a4642;min-width:48px}
+.time-badge.current{color:#9d96e8}
+.cur-dot{width:5px;height:5px;border-radius:50%;background:#7F77DD;flex-shrink:0}
+.time-books{font-size:13px;color:#6a6662;flex:1;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.time-note{font-size:10px;color:#3a3632;margin-left:4px}
+.time-arrow{font-size:10px;color:#2a2a2a;transition:transform 0.2s;flex-shrink:0}
+.time-arrow.open{transform:rotate(180deg)}
+
+/* 말씀 본문 */
+.scripture-wrap{padding:10px 0 16px;display:none}
+.scripture-wrap.open{display:block}
+.book-tag{font-size:10px;letter-spacing:0.1em;color:#534AB7;text-transform:uppercase;margin-bottom:8px;margin-top:8px}
+.book-tag:first-child{margin-top:0}
+.verse-row{display:flex;gap:8px;padding:2px 0}
+.vn{font-size:11px;font-family:monospace;color:#2e2c28;min-width:20px;padding-top:3px;flex-shrink:0}
+.vt{font-size:14px;color:#b8b4ac;line-height:1.85}
+
+/* 좌우 스와이프 힌트 */
+.nav-hint{position:fixed;bottom:1.8rem;left:0;right:0;display:flex;justify-content:center;align-items:center;gap:6px;pointer-events:none;z-index:20}
+.nav-hint-inner{font-size:11px;color:#2a2a2a;letter-spacing:0.06em}
+
+/* 파샤 특별 배너 */
+.pasch-banner{text-align:center;padding:2rem 1rem 1rem}
+.pasch-line1{font-size:20px;color:#AFA9EC;font-weight:400;letter-spacing:0.04em;margin-bottom:6px}
+.pasch-line2{font-size:13px;color:#534AB7;letter-spacing:0.1em;text-transform:uppercase}
+</style>
+</head>
+<body>
+
+<div class="slider-wrap" id="sliderWrap">
+  <div class="slider" id="slider"></div>
+</div>
+<div class="nav-hint"><span class="nav-hint-inner">← 스와이프로 날짜 이동 →</span></div>
+
+<script>
+const DAYS=[
+{id:"sat_lazarus",name:"나사로 토요일",weekday:"토요일",month:3,day:28,
+times:[
+{t:"06:00",books:"누가복음 18장",entries:[
+{book:"누가복음 18장",verses:[
+{n:35,v:"여리고에 가까이 가셨을 때에 한 맹인이 길 가에 앉아 구걸하다가"},
+{n:36,v:"무리가 지나감을 듣고 이 무슨 일이냐고 물은대"},
+{n:37,v:"그들이 나사렛 예수께서 지나가신다 하니"},
+{n:38,v:"맹인이 외쳐 이르되 다윗의 자손 예수여 나를 불쌍히 여기소서 하거늘"},
+{n:39,v:"앞서 가는 자들이 그를 꾸짖어 잠잠하라 하되 그가 더욱 크게 소리 질러 다윗의 자손이여 나를 불쌍히 여기소서 하는지라"},
+{n:40,v:"예수께서 머물러 서서 명하여 데려오라 하셨더니 그가 가까이 오매 물어 이르시되"},
+{n:41,v:"네게 무엇을 하여 주기를 원하느냐 이르되 주여 보기를 원하나이다"},
+{n:42,v:"예수께서 그에게 이르시되 보라 네 믿음이 너를 구원하였느니라 하시매"},
+{n:43,v:"곧 보게 되어 하나님께 영광을 돌리며 예수를 따르니 백성이 다 이를 보고 하나님을 찬양하니라"}
+]}]},
+{t:"09:00",books:"요한복음 11장",entries:[
+{book:"요한복음 11장",verses:[
+{n:1,v:"어떤 병자가 있으니 이는 마리아와 그 자매 마르다의 마을 베다니에 사는 나사로라"},
+{n:2,v:"이 마리아는 향유를 주께 붓고 머리털로 주의 발을 닦던 자요 병든 나사로는 그의 오라버니더라"},
+{n:3,v:"이에 그 누이들이 예수께 사람을 보내어 이르되 주여 보시옵소서 사랑하시는 자가 병들었나이다 하니"},
+{n:4,v:"예수께서 들으시고 이르시되 이 병은 죽을 병이 아니라 하나님의 영광을 위함이요 하나님의 아들이 이로 말미암아 영광을 받게 하려 함이라 하시더라"},
+{n:5,v:"예수께서 본래 마르다와 그 동생과 나사로를 사랑하시더니"},
+{n:6,v:"나사로가 병들었다 함을 들으시고 그 계시던 곳에 이틀을 더 유하시고"},
+{n:7,v:"그 후에 제자들에게 이르시되 유대로 다시 가자 하시니"},
+{n:11,v:"이 말씀을 하신 후에 또 이르시되 우리 친구 나사로가 잠들었도다 그러나 내가 깨우러 가노라"},
+{n:14,v:"이에 예수께서 밝히 이르시되 나사로가 죽었느니라"},
+{n:17,v:"예수께서 와서 보시니 나사로가 무덤에 있은 지 이미 나흘이라"},
+{n:21,v:"마르다가 예수께 여짜오되 주께서 여기 계셨더라면 내 오라버니가 죽지 아니하였겠나이다"},
+{n:25,v:"예수께서 이르시되 나는 부활이요 생명이니 나를 믿는 자는 죽어도 살겠고"},
+{n:26,v:"무릇 살아서 나를 믿는 자는 영원히 죽지 아니하리니 이것을 네가 믿느냐"},
+{n:35,v:"예수께서 눈물을 흘리시더라"},
+{n:39,v:"예수께서 이르시되 돌을 옮겨 놓으라 하시니 그 죽은 자의 누이 마르다가 이르되 주여 죽은 지가 나흘이 되었으매 벌써 냄새가 나나이다"},
+{n:40,v:"예수께서 이르시되 내 말이 네가 믿으면 하나님의 영광을 보리라 하지 아니하였느냐 하시니"},
+{n:43,v:"이 말씀을 하시고 큰 소리로 나사로야 나오라 부르시니"},
+{n:44,v:"죽은 자가 수족을 베로 동인 채로 나오는데 그 얼굴은 수건에 싸였더라 예수께서 이르시되 풀어 놓아 다니게 하라 하시니라"},
+{n:45,v:"마리아에게 와서 예수께서 하신 일을 본 많은 유대인이 그를 믿었으나"}
+]}]},
+{t:"17:00",note:"하루의 끝",books:"요한복음 12장 1-11",entries:[
+{book:"요한복음 12장",verses:[
+{n:1,v:"유월절 엿새 전에 예수께서 베다니에 이르시니 이곳은 예수께서 죽은 자 가운데서 살리신 나사로가 있는 곳이라"},
+{n:2,v:"거기서 예수를 위하여 잔치할새 마르다는 일을 하고 나사로는 예수와 함께 앉은 자 중에 있더라"},
+{n:3,v:"마리아는 지극히 비싼 향유 곧 순전한 나드 한 근을 가져다가 예수의 발에 붓고 자기 머리털로 그의 발을 닦으니 향유 냄새가 집에 가득하더라"},
+{n:7,v:"예수께서 이르시되 그를 가만 두어 나의 장례할 날을 위하여 그것을 간직하게 하라"},
+{n:11,v:"나사로 때문에 많은 유대인이 가서 예수를 믿음이러라"}
+]}]}
+]},
+{id:"palm_sunday",name:"거룩한 손바닥 주일",weekday:"주일",month:3,day:29,
+times:[
+{t:"09:00",books:"마태복음 21장, 마가복음 11장, 누가복음 19장, 요한복음 12장",entries:[
+{book:"마태복음 21장",verses:[
+{n:7,v:"나귀와 나귀 새끼를 끌고 와서 자기들의 겉옷을 그 위에 얹으매 예수께서 그 위에 타시니"},
+{n:9,v:"앞에서 가고 뒤에서 따르는 무리가 소리 높여 이르되 호산나 다윗의 자손이여 찬송하리로다 주의 이름으로 오시는 이여 가장 높은 곳에서 호산나 하더라"},
+{n:12,v:"예수께서 성전에 들어가사 성전 안에서 매매하는 모든 사람들을 내쫓으시며 돈 바꾸는 사람들의 상과 비둘기 파는 사람들의 의자를 둘러 엎으시고"},
+{n:13,v:"그들에게 이르시되 기록된 바 내 집은 기도하는 집이라 일컬음을 받으리라 하였거늘 너희는 강도의 소굴을 만드는도다 하시니라"}
+]},
+{book:"누가복음 19장",verses:[
+{n:38,v:"이르되 찬송하리로다 주의 이름으로 오시는 왕이여 하늘에는 평화요 가장 높은 곳에는 영광이로다 하니"},
+{n:40,v:"대답하여 이르시되 내가 너희에게 말하노니 만일 이 사람들이 침묵하면 돌들이 소리 지르리라 하시니라"},
+{n:41,v:"가까이 오사 성을 보시고 우시며"}
+]},
+{book:"요한복음 12장",verses:[
+{n:13,v:"종려나무 가지를 가지고 맞으러 나가 외치되 호산나 찬송하리로다 주의 이름으로 오시는 이 곧 이스라엘의 왕이시여 하더라"}
+]}]},
+{t:"15:00",books:"마태복음 21장 10-17",entries:[
+{book:"마태복음 21장",verses:[
+{n:13,v:"그들에게 이르시되 기록된 바 내 집은 기도하는 집이라 일컬음을 받으리라 하였거늘 너희는 강도의 소굴을 만드는도다 하시니라"},
+{n:17,v:"그들을 떠나 성 밖으로 베다니에 가서 거기서 유하시니라"}
+]}]},
+{t:"17:00",books:"마태복음 20장",entries:[
+{book:"마태복음 20장",verses:[
+{n:26,v:"너희 중에는 그렇지 않아야 하나니 너희 중에 누구든지 크고자 하는 자는 너희를 섬기는 자가 되고"},
+{n:28,v:"인자가 온 것은 섬김을 받으려 함이 아니라 도리어 섬기려 하고 자기 목숨을 많은 사람의 대속물로 주려 함이니라"}
+]}]},
+{t:"18:00",note:"다음 날",books:"요한복음 12장 20-36",entries:[
+{book:"요한복음 12장",verses:[
+{n:24,v:"내가 진실로 진실로 너희에게 이르노니 한 알의 밀이 땅에 떨어져 죽지 아니하면 한 알 그대로 있고 죽으면 많은 열매를 맺느니라"},
+{n:32,v:"내가 땅에서 들리면 모든 사람을 내게로 이끌겠노라 하시니"},
+{n:36,v:"너희에게 아직 빛이 있을 동안에 빛을 믿으라 그리하면 빛의 아들이 되리라"}
+]}]},
+{t:"21:00",books:"누가복음 9장",entries:[
+{book:"누가복음 9장",verses:[
+{n:20,v:"예수께서 이르시되 너희는 나를 누구라 하느냐 베드로가 대답하여 이르되 하나님의 그리스도시니이다 하니"},
+{n:22,v:"이르시되 인자가 많은 고난을 받고 장로들과 대제사장들과 서기관들에게 버린바 되어 죽임을 당하고 제삼일에 살아나야 하리라 하시고"}
+]}]},
+{t:"24:00",books:"마가복음 10장",entries:[
+{book:"마가복음 10장",verses:[
+{n:33,v:"보라 우리가 예루살렘에 올라가노니 인자가 대제사장들과 서기관들에게 넘겨지매 그들이 죽이기로 결의하고 이방인들에게 넘겨 주겠고"},
+{n:34,v:"그들은 능욕하며 침 뱉으며 채찍질하고 죽일 것이나 그는 삼 일 만에 살아나리라 하시니라"}
+]}]}
+]},
+{id:"holy_mon",name:"거룩한 월요일",weekday:"월요일",month:3,day:30,
+times:[
+{t:"03:00",books:"마가복음 8장",entries:[{book:"마가복음 8장",verses:[
+{n:29,v:"또 물으시되 너희는 나를 누구라 하느냐 베드로가 대답하여 이르되 주는 그리스도시니이다 하매"},
+{n:33,v:"예수께서 돌이키사 제자들을 보시며 베드로를 꾸짖어 이르시되 사탄아 내 뒤로 물러가라 네가 하나님의 일을 생각하지 아니하고 도리어 사람의 일을 생각하는도다 하시고"}
+]}]},
+{t:"05:00",books:"마태복음 17장",entries:[{book:"마태복음 17장",verses:[
+{n:20,v:"이르시되 너희 믿음이 작은 까닭이니라 진실로 너희에게 이르노니 만일 너희에게 믿음이 겨자씨 한 알 만큼만 있어도 이 산을 명하여 여기서 저기로 옮겨지라 하면 옮겨질 것이요 또 너희가 못할 것이 없으리라"},
+{n:23,v:"죽임을 당하고 제삼일에 살아나리라 하시니 제자들이 매우 근심하더라"}
+]}]},
+{t:"06:00",books:"마가복음 11장",entries:[{book:"마가복음 11장",verses:[
+{n:13,v:"멀리서 잎사귀 있는 한 무화과나무를 보시고 혹 그 나무에 무엇이 있을까 하여 가셨더니 가서 보신즉 잎사귀 외에 아무 것도 없더라 이는 무화과의 때가 아님이라"},
+{n:17,v:"이에 가르쳐 이르시되 기록된 바 내 집은 만민이 기도하는 집이라 칭함을 받으리라고 하지 아니하였느냐 너희는 강도의 소굴을 만들었도다 하시매"},
+{n:24,v:"그러므로 내가 너희에게 말하노니 무엇이든지 기도하고 구하는 것은 받은 줄로 믿으라 그리하면 너희에게 그대로 되리라"}
+]}]},
+{t:"09:00",books:"마가복음 11장",entries:[{book:"마가복음 11장",verses:[
+{n:22,v:"예수께서 그들에게 대답하여 이르시되 하나님을 믿으라"},
+{n:24,v:"그러므로 내가 너희에게 말하노니 무엇이든지 기도하고 구하는 것은 받은 줄로 믿으라"}
+]}]},
+{t:"12:00",books:"요한복음 2장",entries:[{book:"요한복음 2장",verses:[
+{n:16,v:"비둘기 파는 사람들에게 이르시되 이것을 여기서 가져가라 내 아버지의 집으로 장사하는 집을 만들지 말라 하시니"}
+]}]},
+{t:"15:00",books:"마태복음 21장",entries:[{book:"마태복음 21장",verses:[
+{n:25,v:"요한의 세례가 어디로부터 왔느냐 하늘로부터냐 사람으로부터냐"}
+]}]},
+{t:"17:00",note:"하루의 끝",books:"요한복음 8장 51-59",entries:[{book:"요한복음 8장",verses:[
+{n:58,v:"예수께서 이르시되 진실로 진실로 너희에게 이르노니 아브라함이 나기 전부터 내가 있느니라 하시니"}
+]}]},
+{t:"18:00",note:"다음 날",books:"누가복음 13장",entries:[{book:"누가복음 13장",verses:[
+{n:24,v:"좁은 문으로 들어가기를 힘쓰라 내가 너희에게 이르노니 들어가기를 구하여도 못하는 자가 많으리라"},
+{n:30,v:"보라 나중 된 자로서 먼저 될 자도 있고 먼저 된 자로서 나중 될 자도 있느니라 하시더라"}
+]}]},
+{t:"21:00",books:"누가복음 13장",entries:[{book:"누가복음 13장",verses:[
+{n:34,v:"예루살렘아 예루살렘아 선지자들을 죽이고 네게 파송된 자들을 돌로 치는 자여 암탉이 제 새끼를 날개 아래에 모음 같이 내가 너희의 자녀를 모으려 한 일이 몇 번이냐 그러나 너희가 원하지 아니하였도다"}
+]}]},
+{t:"24:00",books:"누가복음 21장",entries:[{book:"누가복음 21장",verses:[
+{n:36,v:"이러므로 너희는 장차 올 이 모든 일을 능히 피하고 인자 앞에 서도록 항상 기도하며 깨어 있으라 하시니라"}
+]}]}
+]},
+{id:"holy_tue",name:"거룩한 화요일",weekday:"화요일",month:3,day:31,
+times:[
+{t:"03:00",books:"누가복음 11장",entries:[{book:"누가복음 11장",verses:[
+{n:39,v:"주께서 이르시되 너희 바리새인은 지금 잔과 대접의 겉은 깨끗이 하나 너희 속에는 탐욕과 악독이 가득하도다"},
+{n:52,v:"화 있을진저 너희 율법교사여 너희가 지식의 열쇠를 가져가서 너희도 들어가지 않고 또 들어가고자 하는 자도 막았느니라 하시니라"}
+]}]},
+{t:"05:00",books:"마가복음 13장",entries:[{book:"마가복음 13장",verses:[
+{n:31,v:"천지는 없어지겠으나 내 말은 없어지지 아니하리라"},
+{n:37,v:"깨어 있으라 내가 너희에게 하는 이 말은 모든 사람에게 하는 말이니라 하시니라"}
+]}]},
+{t:"06:00",books:"요한복음 8장 21-29",entries:[{book:"요한복음 8장",verses:[
+{n:23,v:"예수께서 이르시되 너희는 아래에서 났고 나는 위에서 났으며 너희는 이 세상에 속하였고 나는 이 세상에 속하지 아니하였느니라"},
+{n:29,v:"나를 보내신 이가 나와 함께 하시도다 나는 항상 그가 기뻐하시는 일을 행하므로 나를 혼자 두지 아니하셨느니라"}
+]}]},
+{t:"09:00",books:"마태복음 23-24장",entries:[{book:"마태복음 24장",verses:[
+{n:13,v:"그러나 끝까지 견디는 자는 구원을 얻으리라"},
+{n:35,v:"천지는 없어질지언정 내 말은 없어지지 아니하리라"}
+]}]},
+{t:"12:00",books:"요한복음 8장 12-20",entries:[{book:"요한복음 8장",verses:[
+{n:12,v:"예수께서 또 말씀하여 이르시되 나는 세상의 빛이니 나를 따르는 자는 어둠에 다니지 아니하고 생명의 빛을 얻으리라"}
+]}]},
+{t:"15:00",books:"마태복음 24장",entries:[{book:"마태복음 24장",verses:[
+{n:30,v:"그 때에 인자의 징조가 하늘에서 보이겠고 그 때에 땅의 모든 족속들이 통곡하며 그들이 인자가 구름을 타고 능력과 큰 영광으로 오는 것을 보리라"},
+{n:44,v:"이러므로 너희도 준비하고 있으라 생각하지 않은 때에 인자가 오리라"}
+]}]},
+{t:"17:00",note:"하루의 끝",books:"마태복음 25장",entries:[{book:"마태복음 25장",verses:[
+{n:40,v:"임금이 대답하여 이르시되 내가 진실로 너희에게 이르노니 너희가 여기 내 형제 중에 지극히 작은 자 하나에게 한 것이 곧 내게 한 것이니라 하시고"}
+]}]},
+{t:"18:00",note:"다음 날",books:"마태복음 22장",entries:[{book:"마태복음 22장",verses:[
+{n:14,v:"청함을 받은 자는 많되 택함을 입은 자는 적으니라"}
+]}]},
+{t:"21:00",books:"마태복음 24장",entries:[{book:"마태복음 24장",verses:[
+{n:42,v:"그러므로 깨어 있으라 어느 날에 너희 주가 임할는지 너희가 알지 못함이니라"}
+]}]},
+{t:"24:00",books:"마태복음 25장",entries:[{book:"마태복음 25장",verses:[
+{n:1,v:"그 때에 천국은 마치 등을 들고 신랑을 맞으러 나간 열 처녀와 같다 하리니"},
+{n:13,v:"그런즉 깨어 있으라 너희는 그 날과 그 때를 알지 못하느니라"}
+]}]}
+]},
+{id:"holy_wed",name:"거룩한 수요일",weekday:"수요일",month:4,day:1,
+times:[
+{t:"06:00",books:"요한복음 11장 45-54",entries:[{book:"요한복음 11장",verses:[
+{n:50,v:"한 사람이 백성을 위하여 죽어서 온 민족이 망하지 않게 되는 것이 너희에게 유익한 줄을 생각하지 아니하는도다"},
+{n:53,v:"이 날부터는 그들이 예수를 죽이려고 모의하니라"}
+]}]},
+{t:"09:00",books:"누가복음 22장 1-6",entries:[{book:"누가복음 22장",verses:[
+{n:3,v:"열둘 중의 하나인 가룟인이라 부르는 유다에게 사탄이 들어가니"},
+{n:6,v:"유다가 허락하고 예수를 무리가 없을 때에 넘겨 줄 기회를 찾더라"}
+]}]},
+{t:"12:00",books:"요한복음 12장 1-11",entries:[{book:"요한복음 12장",verses:[
+{n:3,v:"마리아는 지극히 비싼 향유 곧 순전한 나드 한 근을 가져다가 예수의 발에 붓고 자기 머리털로 그의 발을 닦으니 향유 냄새가 집에 가득하더라"},
+{n:8,v:"가난한 자들은 항상 너희와 함께 있거니와 나는 항상 있지 아니하리라 하시니라"}
+]}]},
+{t:"15:00",books:"마태복음 26장 3-16",entries:[{book:"마태복음 26장",verses:[
+{n:13,v:"내가 진실로 너희에게 이르노니 온 천하에 어디서든지 이 복음이 전파되는 곳에서는 이 여자가 행한 일도 말하여 그를 기억하리라 하시니라"},
+{n:15,v:"내가 예수를 너희에게 넘겨 주리니 얼마나 주려느냐 하니 그들이 은 삼십을 달아 주거늘"}
+]}]},
+{t:"17:00",note:"하루의 끝",books:"요한복음 12장 27-36",entries:[{book:"요한복음 12장",verses:[
+{n:27,v:"지금 내 마음이 괴로우니 무슨 말을 하리요 아버지여 나를 구원하여 이 때를 면하게 하여 주옵소서 그러나 내가 이를 위하여 이 때에 왔나이다"},
+{n:32,v:"내가 땅에서 들리면 모든 사람을 내게로 이끌겠노라 하시니"}
+]}]},
+{t:"18:00",note:"다음 날",books:"요한복음 10장 17-21",entries:[{book:"요한복음 10장",verses:[
+{n:17,v:"내가 내 목숨을 버리는 것은 그것을 내가 다시 얻기 위함이니 이로 말미암아 아버지께서 나를 사랑하시느니라"},
+{n:18,v:"이를 내게서 빼앗는 자가 있는 것이 아니라 내가 스스로 버리노라 나는 버릴 권세도 있고 다시 얻을 권세도 있으니"}
+]}]},
+{t:"21:00",books:"마가복음 14장 3-11",entries:[{book:"마가복음 14장",verses:[
+{n:9,v:"내가 진실로 너희에게 이르노니 온 천하에 어디서든지 복음이 전파되는 곳에는 이 여자가 행한 일도 말하여 그를 기억하리라 하시니라"}
+]}]},
+{t:"24:00",books:"요한복음 12장 36-43",entries:[{book:"요한복음 12장",verses:[
+{n:43,v:"그들은 사람의 영광을 하나님의 영광보다 더 사랑하였더라"}
+]}]}
+]},
+{id:"holy_thu",name:"언약의 목요일",weekday:"목요일",month:4,day:2,
+times:[
+{t:"06:00",books:"누가복음 22장 7-13",entries:[{book:"누가복음 22장",verses:[
+{n:8,v:"예수께서 베드로와 요한을 보내시며 이르시되 가서 우리를 위하여 유월절을 준비하여 우리로 먹게 하라"},
+{n:13,v:"그들이 나가 그 하신 말씀대로 만나 유월절을 준비하니라"}
+]}]},
+{t:"15:00",books:"요한복음 13장, 마태복음 26장",entries:[
+{book:"요한복음 13장",verses:[
+{n:1,v:"유월절 전에 예수께서 자기가 세상을 떠나 아버지께로 돌아가실 때가 이른 줄 아시고 세상에 있는 자기 사람들을 사랑하시되 끝까지 사랑하시니라"},
+{n:5,v:"이에 대야에 물을 떠서 제자들의 발을 씻으시고 그 두르신 수건으로 닦기를 시작하여"},
+{n:34,v:"새 계명을 너희에게 주노니 서로 사랑하라 내가 너희를 사랑한 것 같이 너희도 서로 사랑하라"},
+{n:35,v:"너희가 서로 사랑하면 이로써 모든 사람이 너희가 내 제자인 줄 알리라"}
+]},
+{book:"마태복음 26장",verses:[
+{n:26,v:"그들이 먹을 때에 예수께서 떡을 가지사 축복하시고 떼어 제자들에게 주시며 이르시되 받아서 먹으라 이것은 내 몸이니라 하시고"},
+{n:28,v:"이것은 죄 사함을 얻게 하려고 많은 사람을 위하여 흘리는 바 나의 피 곧 언약의 피니라"}
+]}]},
+{t:"17:00",note:"하루의 끝",books:"요한복음 13장 21-30",entries:[{book:"요한복음 13장",verses:[
+{n:30,v:"유다가 그 조각을 받고 곧 나가니 밤이러라"}
+]}]},
+{t:"18:00",note:"다음 날",books:"요한복음 14-17장",entries:[
+{book:"요한복음 14장",verses:[
+{n:6,v:"예수께서 이르시되 내가 곧 길이요 진리요 생명이니 나로 말미암지 않고는 아버지께로 올 자가 없느니라"},
+{n:27,v:"평안을 너희에게 끼치노니 곧 나의 평안을 너희에게 주노라 내가 너희에게 주는 것은 세상이 주는 것과 같지 아니하니라 너희는 마음에 근심하지도 말고 두려워하지도 말라"}
+]},
+{book:"요한복음 15장",verses:[
+{n:5,v:"나는 포도나무요 너희는 가지라 그가 내 안에, 내가 그 안에 거하면 사람이 열매를 많이 맺나니 나를 떠나서는 너희가 아무 것도 할 수 없음이라"},
+{n:13,v:"사람이 친구를 위하여 자기 목숨을 버리면 이보다 더 큰 사랑이 없나니"}
+]},
+{book:"요한복음 17장",verses:[
+{n:3,v:"영생은 곧 유일하신 참 하나님과 그가 보내신 자 예수 그리스도를 아는 것이니이다"},
+{n:21,v:"아버지여, 아버지께서 내 안에, 내가 아버지 안에 있는 것 같이 그들도 다 하나가 되어 우리 안에 있게 하사"}
+]}]},
+{t:"21:00",books:"마태복음 26장 — 베드로의 부인 예고",entries:[{book:"마태복음 26장",verses:[
+{n:34,v:"예수께서 이르시되 내가 진실로 네게 이르노니 오늘 밤 닭 울기 전에 네가 세 번 나를 부인하리라"}
+]}]},
+{t:"24:00",books:"겟세마네 기도",entries:[
+{book:"마태복음 26장",verses:[
+{n:39,v:"조금 나아가사 얼굴을 땅에 대시고 엎드려 기도하여 이르시되 내 아버지여 만일 할 만하시거든 이 잔을 내게서 지나가게 하옵소서 그러나 나의 원대로 마시옵고 아버지의 원대로 하옵소서 하시고"},
+{n:41,v:"시험에 들지 않게 깨어 기도하라 마음에는 원이로되 육신이 약하도다 하시고"}
+]},
+{book:"누가복음 22장",verses:[
+{n:44,v:"예수께서 힘쓰고 애써 더욱 간절히 기도하시니 땀이 땅에 떨어지는 핏방울 같이 되더라"}
+]}]}
+]},
+{id:"good_fri",name:"선한 금요일",weekday:"금요일",month:4,day:3,
+times:[
+{t:"03:00",books:"체포 — 마태복음 26장, 요한복음 18장",entries:[
+{book:"마태복음 26장",verses:[
+{n:50,v:"예수께서 이르시되 친구여 네가 무엇을 하려고 왔는지 행하라 하신대 이에 그들이 나아와 예수께 손을 대어 잡는지라"},
+{n:52,v:"이에 예수께서 이르시되 네 칼을 도로 칼집에 꽂으라 칼을 가지는 자는 다 칼로 망하느니라"},
+{n:56,v:"이에 제자들이 다 예수를 버리고 도망하니라"}
+]},
+{book:"요한복음 18장",verses:[
+{n:11,v:"예수께서 베드로더러 이르시되 칼을 칼집에 꽂으라 아버지께서 주신 잔을 내가 마시지 아니하겠느냐 하시니라"}
+]}]},
+{t:"05:00",books:"심문과 베드로의 부인",entries:[
+{book:"마태복음 26장",verses:[
+{n:63,v:"예수께서 침묵하시거늘 대제사장이 이르되 내가 너로 살아 계신 하나님께 맹세하게 하노니 네가 하나님의 아들 그리스도인지 우리에게 말하라"},
+{n:64,v:"예수께서 이르시되 네가 말하였느니라 그러나 내가 너희에게 이르노니 이 후에 인자가 권능의 우편에 앉아 있는 것과 하늘 구름을 타고 오는 것을 너희가 보리라 하시니"}
+]},
+{book:"누가복음 22장",verses:[
+{n:61,v:"주께서 돌이켜 베드로를 보시니 베드로가 주의 말씀이 생각나서"},
+{n:62,v:"밖에 나가서 심히 통곡하니라"}
+]}]},
+{t:"06:00",books:"빌라도 앞에 — 요한복음 18장",entries:[{book:"요한복음 18장",verses:[
+{n:36,v:"예수께서 대답하시되 내 나라는 이 세상에 속한 것이 아니니라"},
+{n:37,v:"예수께서 대답하시되 네 말과 같이 내가 왕이니라 내가 이를 위하여 태어났으며 이를 위하여 세상에 왔나니 곧 진리에 대하여 증언하려 함이로라"},
+{n:38,v:"빌라도가 이르되 진리가 무엇이냐 하더라"}
+]}]},
+{t:"09:00",books:"십자가형 선고 — 마태복음 27장",entries:[{book:"마태복음 27장",verses:[
+{n:22,v:"빌라도가 이르되 그러면 그리스도라 하는 예수를 내가 어떻게 하랴 그들이 다 이르되 십자가에 못 박혀야 하겠나이다"},
+{n:26,v:"이에 바라바는 그들에게 놓아 주고 예수는 채찍질하고 십자가에 못 박히게 넘겨 주니라"}
+]}]},
+{t:"12:00",books:"십자가 위에서",entries:[
+{book:"누가복음 23장",verses:[
+{n:34,v:"이에 예수께서 이르시되 아버지 저들을 사하여 주옵소서 자기들이 하는 것을 알지 못함이니이다 하시더라"},
+{n:43,v:"예수께서 이르시되 내가 진실로 네게 이르노니 오늘 네가 나와 함께 낙원에 있으리라 하시니라"}
+]},
+{book:"요한복음 19장",verses:[
+{n:26,v:"예수께서 자기의 어머니와 사랑하시는 제자가 곁에 서 있는 것을 보시고 자기 어머니께 말씀하시되 여자여 보소서 아들이니이다 하시고"}
+]}]},
+{t:"15:00",books:"운명하심",entries:[
+{book:"마태복음 27장",verses:[
+{n:46,v:"제구시쯤에 예수께서 크게 소리 질러 이르시되 엘리 엘리 라마 사박다니 하시니 이는 곧 나의 하나님, 나의 하나님, 어찌하여 나를 버리셨나이까 하는 뜻이라"}
+]},
+{book:"요한복음 19장",verses:[
+{n:30,v:"예수께서 신 포도주를 받으신 후에 이르시되 다 이루었다 하시고 머리를 숙이니 영혼이 떠나가시니라"}
+]}]},
+{t:"17:00",note:"하루의 끝",books:"십자가 이후 — 마태복음 27장",entries:[{book:"마태복음 27장",verses:[
+{n:51,v:"이에 성소 휘장이 위로부터 아래까지 찢어져 둘이 되고 땅이 진동하며 바위가 터지고"},
+{n:54,v:"이는 진실로 하나님의 아들이었도다 하더라"}
+]}]},
+{t:"18:00",note:"다음 날",books:"장례 — 마태복음 27장, 요한복음 19장",entries:[{book:"요한복음 19장",verses:[
+{n:30,v:"예수께서 신 포도주를 받으신 후에 이르시되 다 이루었다 하시고 머리를 숙이니 영혼이 떠나가시니라"},
+{n:42,v:"이 날은 유대인의 준비일이요 또 무덤이 가까운 고로 예수를 거기 두니라"}
+]}]},
+{t:"21:00",books:"무덤 봉인 — 마태복음 27장",entries:[{book:"마태복음 27장",verses:[
+{n:65,v:"빌라도가 이르되 너희에게 경비병이 있으니 가서 힘대로 굳게 지키라 하거늘"},
+{n:66,v:"그들이 경비병과 함께 가서 돌을 인봉하고 무덤을 굳게 지키니라"}
+]}]}
+]},
+{id:"bright_sat",name:"광명한 토요일",weekday:"토요일",month:4,day:4,
+times:[
+{t:"09:00",books:"마태복음 16장",entries:[{book:"마태복음 16장",verses:[
+{n:24,v:"이에 예수께서 제자들에게 이르시되 누구든지 나를 따라오려거든 자기를 부인하고 자기 십자가를 지고 나를 따를 것이니라"},
+{n:25,v:"누구든지 제 목숨을 구원하고자 하면 잃을 것이요 누구든지 나를 위하여 제 목숨을 잃으면 찾으리라"}
+]}]},
+{t:"12:00",books:"마태복음 5장 — 팔복",entries:[{book:"마태복음 5장",verses:[
+{n:3,v:"심령이 가난한 자는 복이 있나니 천국이 그들의 것임이요"},
+{n:4,v:"애통하는 자는 복이 있나니 그들이 위로를 받을 것임이요"},
+{n:5,v:"온유한 자는 복이 있나니 그들이 땅을 기업으로 받을 것임이요"},
+{n:6,v:"의에 주리고 목마른 자는 복이 있나니 그들이 배부를 것임이요"},
+{n:7,v:"긍휼히 여기는 자는 복이 있나니 그들이 긍휼히 여김을 받을 것임이요"},
+{n:8,v:"마음이 청결한 자는 복이 있나니 그들이 하나님을 볼 것임이요"},
+{n:9,v:"화평하게 하는 자는 복이 있나니 그들이 하나님의 아들이라 일컬음을 받을 것임이요"},
+{n:10,v:"의를 위하여 박해를 받은 자는 복이 있나니 천국이 그들의 것임이라"}
+]}]},
+{t:"15:00",books:"요한복음 5장",entries:[{book:"요한복음 5장",verses:[
+{n:24,v:"내 말을 듣고 또 나 보내신 이를 믿는 자는 영생을 얻었고 심판에 이르지 아니하나니 사망에서 생명으로 옮겼느니라"},
+{n:25,v:"진실로 진실로 너희에게 이르노니 죽은 자들이 하나님의 아들의 음성을 들을 때가 오나니 곧 이 때라 듣는 자는 살아나리라"}
+]}]},
+{t:"17:00",note:"하루의 끝",books:"마태복음 28장 — 부활 새벽",entries:[{book:"마태복음 28장",verses:[
+{n:6,v:"그가 여기 계시지 않고 그가 말씀하시던 대로 살아나셨느니라 와서 그가 누우셨던 곳을 보라"},
+{n:19,v:"그러므로 너희는 가서 모든 민족을 제자로 삼아 아버지와 아들과 성령의 이름으로 세례를 베풀고"},
+{n:20,v:"내가 너희에게 분부한 모든 것을 가르쳐 지키게 하라 볼지어다 내가 세상 끝날까지 너희와 항상 함께 있으리라 하시니라"}
+]}]}
+]},
+{id:"pasch",name:"거룩한 파샤",weekday:"주일",month:4,day:5,special:true,
+times:[
+{t:"06:00",books:"마가복음 16장, 요한복음 20장 — 빈 무덤",entries:[
+{book:"마가복음 16장",verses:[
+{n:6,v:"청년이 이르되 놀라지 말라 너희가 십자가에 못 박히신 나사렛 예수를 찾는구나 그가 살아나셨고 여기 계시지 아니하니라 보라 그를 두었던 곳이니라"},
+{n:7,v:"가서 그의 제자들과 베드로에게 이르기를 예수께서 너희보다 먼저 갈릴리로 가시나니 전에 너희에게 말씀하신 대로 너희가 거기서 뵈오리라 하라 하는지라"}
+]},
+{book:"요한복음 20장",verses:[
+{n:16,v:"예수께서 마리아야 하시거늘 마리아가 돌이켜 히브리 말로 랍오니 하니 (이는 선생님이라는 말이라)"},
+{n:17,v:"예수께서 이르시되 나를 붙들지 말라 내가 아직 아버지께로 올라가지 아니하였노라 너는 내 형제들에게 가서 이르되 내가 내 아버지 곧 너희 아버지, 내 하나님 곧 너희 하나님께로 올라간다 하라 하시니"},
+{n:18,v:"막달라 마리아가 가서 제자들에게 내가 주를 보았다 하고 또 주께서 자기에게 이렇게 말씀하셨다 이르니라"}
+]}]}
+]}
+];
+
+function getToday(){
+  const n=new Date();
+  return DAYS.findIndex(d=>d.month===n.getMonth()+1&&d.day===n.getDate()&&n.getFullYear()===2026);
+}
+function getCurTimeT(dayIdx){
+  const ti=getToday();
+  if(ti!==dayIdx)return null;
+  const h=new Date().getHours();
+  let best=null,bh=-1;
+  DAYS[dayIdx].times.forEach(t=>{const th=parseInt(t.t);if(th<=h&&th>bh){bh=th;best=t.t;}});
+  return best;
+}
+function fmtDate(m,d){return`${m}월 ${d}일`;}
+
+let curSlide=0;
+const totalSlides=DAYS.length;
+
+function buildSlide(idx){
+  const day=DAYS[idx];
+  const isToday=getToday()===idx;
+  const curT=getCurTimeT(idx);
+  const div=document.createElement('div');
+  div.className='slide';
+  div.id=`slide_${idx}`;
+
+  let timesHtml=day.times.map((ti,ti_i)=>{
+    const isCur=isToday&&curT===ti.t;
+    const noteHtml=ti.note?`<span class="time-note">(${ti.note})</span>`:'';
+    const curDotHtml=isCur?`<div class="cur-dot"></div>`:'';
+    const versesHtml=ti.entries.map(e=>`
+      <div class="book-tag">${e.book}</div>
+      ${e.verses.map(v=>`<div class="verse-row"><span class="vn">${v.n}</span><span class="vt">${v.v}</span></div>`).join('')}
+    `).join('');
+    const openClass=isCur?'open':'';
+    const arrowClass=isCur?'open':'';
+    return`<div class="time-block">
+      <div class="time-toggle" onclick="toggleT(${idx},${ti_i})">
+        ${curDotHtml}
+        <div class="time-badge${isCur?' current':''}">${ti.t}${noteHtml}</div>
+        <div class="time-books">${ti.books}</div>
+        <div class="time-arrow ${arrowClass}" id="arr_${idx}_${ti_i}">▾</div>
+      </div>
+      <div class="scripture-wrap ${openClass}" id="sw_${idx}_${ti_i}">${versesHtml}</div>
+    </div>`;
+  }).join('');
+
+  const paschBanner=day.special?`<div class="pasch-banner"><div class="pasch-line1">예수님이 부활하셨다!</div><div class="pasch-line2">He is risen indeed</div></div>`:'';
+
+  div.innerHTML=`
+    <div class="day-header">
+      <div class="day-header-inner">
+        <div class="church-label">Reframe Church · 고난주간 2026</div>
+        <div class="day-name">${day.name}</div>
+        <div class="day-date">${day.weekday} · ${fmtDate(day.month,day.day)}</div>
+        ${isToday?`<div class="today-chip">오늘</div>`:''}
+      </div>
+      <div class="dots" id="dots_${idx}"></div>
+    </div>
+    <div class="times-list">${timesHtml}${paschBanner}</div>
+  `;
+  return div;
+}
+
+function buildDots(activeIdx){
+  DAYS.forEach((_,i)=>{
+    const dotsEl=document.getElementById(`dots_${i}`);
+    if(!dotsEl)return;
+    dotsEl.innerHTML=DAYS.map((_,j)=>{
+      const isPasch=j===DAYS.length-1;
+      const isActive=j===activeIdx;
+      return`<div class="dot${isActive?' active':''}${isPasch?' pasch':''}" onclick="goTo(${j})"></div>`;
+    }).join('');
+  });
+}
+
+function toggleT(slideIdx,timeIdx){
+  const sw=document.getElementById(`sw_${slideIdx}_${timeIdx}`);
+  const ar=document.getElementById(`arr_${slideIdx}_${timeIdx}`);
+  const open=sw.classList.toggle('open');
+  ar.classList.toggle('open',open);
+}
+
+const slider=document.getElementById('slider');
+DAYS.forEach((_,i)=>slider.appendChild(buildSlide(i)));
+
+function goTo(idx,animate=true){
+  if(idx<0||idx>=totalSlides)return;
+  curSlide=idx;
+  slider.style.transition=animate?'transform 0.38s cubic-bezier(0.4,0,0.2,1)':'none';
+  slider.style.transform=`translateX(-${idx*100}%)`;
+  buildDots(idx);
+  // 슬라이드 이동 시 스크롤 맨 위로
+  const el=document.getElementById(`slide_${idx}`);
+  if(el)setTimeout(()=>el.scrollTop=0,50);
+}
+
+// 초기 슬라이드
+const todayIdx=getToday();
+goTo(todayIdx>=0?todayIdx:0,false);
+
+// 터치/스와이프
+const wrap=document.getElementById('sliderWrap');
+let startX=0,startY=0,isDragging=false,isScrolling=false;
+
+wrap.addEventListener('touchstart',e=>{
+  startX=e.touches[0].clientX;
+  startY=e.touches[0].clientY;
+  isDragging=true;
+  isScrolling=false;
+},{passive:true});
+
+wrap.addEventListener('touchmove',e=>{
+  if(!isDragging)return;
+  const dx=e.touches[0].clientX-startX;
+  const dy=e.touches[0].clientY-startY;
+  if(!isScrolling&&Math.abs(dy)>Math.abs(dx)*1.2){isScrolling=true;}
+  if(!isScrolling&&Math.abs(dx)>8){e.preventDefault();}
+},{passive:false});
+
+wrap.addEventListener('touchend',e=>{
+  if(!isDragging||isScrolling){isDragging=false;return;}
+  const dx=e.changedTouches[0].clientX-startX;
+  if(Math.abs(dx)>50){
+    if(dx<0&&curSlide<totalSlides-1)goTo(curSlide+1);
+    else if(dx>0&&curSlide>0)goTo(curSlide-1);
+  }
+  isDragging=false;
+},{passive:true});
+
+// 키보드 (데스크탑)
+document.addEventListener('keydown',e=>{
+  if(e.key==='ArrowRight'&&curSlide<totalSlides-1)goTo(curSlide+1);
+  if(e.key==='ArrowLeft'&&curSlide>0)goTo(curSlide-1);
+});
+</script>
+</body>
+</html>

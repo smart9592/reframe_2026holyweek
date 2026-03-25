@@ -948,7 +948,7 @@ const DAYS=[
 ]}
 ];
 
-function getToday(){const n=new Date();return DAYS.findIndex(d=>d.month===n.getMonth()+1&&d.day===n.getDate()&&n.getFullYear()===2026);}
+function getToday(){const n=new Date();return DAYS.findIndex(d=>d.month===3&&d.day===29);}// 테스트: 3월 29일 고정
 function getCurTimeT(idx){const ti=getToday();if(ti!==idx)return null;const h=new Date().getHours();let best=null,bh=-1;DAYS[idx].times.forEach(t=>{const th=parseInt(t.t);if(th<=h&&th>bh){bh=th;best=t.t;}});return best;}
 function fmtDate(m,d){return`${m}월 ${d}일`;}
 
